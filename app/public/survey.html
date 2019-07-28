@@ -255,19 +255,33 @@
                         $("#q10").val()
                     ]
                 };
-
                 // AJAX post the data to the friends API.
                 $.post("/api/friends", userData, function (data) {
+                    $.get("/api/friends", data => {
+                        console.log(userData);
+                        var totalDifferenceArray = [];
+                        for (var j = 0; j < data.length - 1; j++) {
+                            var newArray = [];
+                            for (var i = 0; i < data[j].scores.length; i++) {
+                                var difference = Math.abs(parseInt(userData.scores[i]) - data[j].scores[i]);
+                                newArray.push(difference);
+                            }
+                            var totalDifference = newArray.reduce((a, b) => a + b, 0);
+                            totalDifferenceArray.push(totalDifference);
+                        }
 
-                    //    for(var i=0; i < data.lenght; i++) {
-                    //       var difference = Math.abs(userData.scores[i] - data.scores[i]
-                    //    }
-                    // Grab the result from the AJAX post so that the best match's name and photo are displayed.
-                    $("#match-name").text(data.name);
-                    $("#match-img").attr("src", data.photo);
+                        console.log(totalDifferenceArray);
+                        const arrMin = arr => Math.min(...arr);
+                        var minimum = arrMin(totalDifferenceArray);
+                        console.log(minimum);
+                        console.log(totalDifferenceArray.indexOf(minimum));
+                        $("#match-name").text(data[totalDifferenceArray.indexOf(minimum)].name);
+                        $("#match-img").attr("src", data[totalDifferenceArray.indexOf(minimum)].photo);
 
-                    // Show the modal with the best match
-                    $("#results-modal").modal("toggle");
+                        // Show the modal with the best match
+                        $("#results-modal").modal("toggle");
+
+                    });
 
                 });
             } else {
